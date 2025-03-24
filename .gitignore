@@ -23,6 +23,7 @@ appsettings.Development.json
 
 # Ignore node_modules (if using npm or yarn for front-end dependencies)
 node_modules/
+Properties/
 
 # Ignore Visual Studio for Mac configuration folder
 .vscode/
