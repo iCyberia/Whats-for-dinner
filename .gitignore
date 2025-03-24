@@ -1,9 +1,31 @@
-# Ignore sensitive configuration files
-appsettings.json
-config.json
-.env
-
-# Ignore build files
+# .NET build output
 bin/
 obj/
-*.log
+
+# ASP.NET Core files
+wwwroot/lib/
+
+# User-specific files
+.vscode/
+.idea/
+.vs/
+
+# Log files
+logs/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Sensitive information
+appsettings.json
+appsettings.Development.json
+
+# Ignore node_modules (if using npm or yarn for front-end dependencies)
+node_modules/
+
+# Ignore Visual Studio for Mac configuration folder
+.vscode/
+
+# Ignore backup files created by the editor
+*~ 
