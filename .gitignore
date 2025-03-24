@@ -10,16 +10,19 @@ wwwroot/lib/
 .idea/
 .vs/
 
+
 # Log files
 logs/
 
 # System files
 .DS_Store
 Thumbs.db
+MenuAppBlazor.csproj
 
 # Sensitive information
 appsettings.json
 appsettings.Development.json
+MenuAppBlazor.csproj.user
 
 # Ignore node_modules (if using npm or yarn for front-end dependencies)
 node_modules/
