@@ -1,7 +1,6 @@
+# What's for dinner?
 
-# MenuAppBlazor
-
-MenuAppBlazor is a web application that helps users manage their meal plans, ingredients, grocery lists, and upcoming menus. This app allows users to add dishes, store ingredients, and create an interactive list of upcoming meals. This app is under active development.
+Whatsfordinner is a web application that helps users manage their meal plans, ingredients, grocery lists, and upcoming menus. This app allows users to add dishes, store ingredients, and create an interactive list of upcoming meals. This app is under active development.
 
 ## Features
 
