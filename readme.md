@@ -1,6 +1,7 @@
 # What's for dinner?
 
 Whatsfordinner is a web application that helps users manage their meal plans, ingredients, grocery lists, and upcoming menus. This app allows users to add dishes, store ingredients, and create an interactive list of upcoming meals. This app is under active development.
+![App Screenshot](img/screenshot.png)
 
 ## Features
 
