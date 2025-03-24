@@ -1,0 +1,51 @@
+﻿/* Sidebar Styles */
+.sidebar {
+    background-color: #2c3e50; /* Dark background */
+    width: 250px; /* Sidebar width */
+    height: 100vh; /* Full height */
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 30px;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for a subtle separation */
+}
+
+    /* Sidebar Menu Items */
+    .sidebar .nav-link {
+        color: #ecf0f1; /* Light gray text */
+        font-size: 16px;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease;
+    }
+
+        /* Sidebar Hover Effect */
+        .sidebar .nav-link:hover {
+            background-color: #34495e; /* Lighter gray on hover */
+            color: #fff;
+        }
+
+        /* Active Menu Item */
+        .sidebar .nav-link.active {
+            background-color: #16a085; /* Active color */
+            color: #fff;
+        }
+
+/* Main Content Area */
+.content {
+    /*margin-left: 250px;*/ /* Adjust the content to avoid overlap with the sidebar */
+    padding-top: 20px;
+    /*width: calc(100% - 250px);*/ /* Make the content take the remaining space */
+}
+
+/* For smaller screens (responsive layout) */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px; /* Adjust for smaller screens */
+    }
+
+    .content {
+        margin-left: -200px;
+        width: calc(100% - 200px);
+    }
+}

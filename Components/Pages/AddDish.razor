@@ -2,12 +2,13 @@
 @rendermode InteractiveServer
 @using MenuAppBlazor.Models
 @inject MenuAppBlazor.Data.MenuContext Db
+@using Microsoft.EntityFrameworkCore
 
 <h3>Add Dish</h3>
 
 @if (debugMessage != null)
 {
-    <div class="alert alert-info">@debugMessage</div>
+        <div class="alert alert-info">@debugMessage</div>
 }
 
 <EditForm Model="@dishModel" OnSubmit="HandleSubmit" FormName="AddDishForm">
@@ -27,23 +28,71 @@
     <h5>Ingredients</h5>
     @foreach (var ing in ingredients)
     {
-        <div class="row mb-2">
-            <div class="col">
-                <InputText class="form-control" @bind-Value="ing.Name" placeholder="Name" />
+            <div class="row mb-2">
+                <div class="col">
+                    <InputText class="form-control" @bind-Value="ing.Name" placeholder="Name" />
+                </div>
+                <div class="col">
+                    <InputNumber class="form-control" @bind-Value="ing.Quantity" placeholder="Quantity" />
+                </div>
+                <div class="col">
+                    <InputText class="form-control" @bind-Value="ing.QuantityType" placeholder="Type (e.g. cups)" />
+                </div>
+                <div class="col">
+                    <!-- Remove button for each ingredient -->
+                    <button type="button" class="btn btn-danger" @onclick="() => RemoveIngredient(ing)">Remove</button>
+                </div>
             </div>
-            <div class="col">
-                <InputNumber class="form-control" @bind-Value="ing.Quantity" placeholder="Quantity" />
-            </div>
-            <div class="col">
-                <InputText class="form-control" @bind-Value="ing.QuantityType" placeholder="Type (e.g. cups)" />
-            </div>
-        </div>
     }
-
 </EditForm>
 
 <button type="button" class="btn btn-secondary mt-2" @onclick="AddIngredient">+ Add Ingredient</button>
 <button type="button" class="btn btn-primary mt-2" @onclick="HandleSubmit">Save Dish</button>
+
+<hr />
+
+<h3>All Dishes</h3>
+
+@if (dishes == null)
+{
+        <p><em>Loading...</em></p>
+}
+else if (!dishes.Any())
+{
+        <p>No dishes found.</p>
+}
+else
+{
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Dish Name</th>
+                    <th>Ingredients</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var dish in dishes)
+            {
+                        <tr>
+                            <td>@dish.Name</td>
+
+                            <td>
+                                <ul>
+                            @foreach (var di in dish.DishIngredients ?? Enumerable.Empty<DishIngredient>())
+                            {
+                                            <li>@di.Ingredient.Name (@di.Quantity @di.QuantityType)</li>
+                            }
+                                </ul>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-primary" href="/edit-dish/@dish.Id">Edit</a>
+                            </td>
+                        </tr>
+            }
+            </tbody>
+        </table>
+}
 
 @code {
     private Dish dishModel = new Dish
@@ -53,12 +102,27 @@
         };
 
     private List<ManualIngredient> ingredients = new();
+    private List<Dish>? dishes;
     private string? debugMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dishes = await Db.Dishes
+            .Include(d => d.DishIngredients)
+                .ThenInclude(di => di.Ingredient)
+            .ToListAsync();
+    }
 
     private void AddIngredient()
     {
         ingredients.Add(new ManualIngredient());
         StateHasChanged();
+    }
+
+    private void RemoveIngredient(ManualIngredient ingredient)
+    {
+        ingredients.Remove(ingredient);
+        StateHasChanged(); // Re-render the component after removing
     }
 
     private async Task HandleSubmit()

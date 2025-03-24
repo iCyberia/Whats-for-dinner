@@ -62,10 +62,35 @@
             </li>
         }
     </ul>
+
+    <!-- Clear All Button -->
+    <button class="btn btn-danger mt-3" @onclick="ConfirmClearAll">Clear All Items</button>
 }
 else
 {
     <p class="text-muted">No meals in the upcoming menu.</p>
+}
+
+<!-- Confirmation Modal -->
+@if (showConfirmClear)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0,0,0,.5);" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Action</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CancelClearAll"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to clear all items from the upcoming menu?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelClearAll">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ClearAllItems">Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
@@ -74,6 +99,7 @@ else
     private UpcomingMenuItem selected = new UpcomingMenuItem();
     private Dish? randomDish;
     private Random rng = new();
+    private bool showConfirmClear = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,5 +167,27 @@ else
     private void CancelRandomSelection()
     {
         randomDish = null;
+    }
+
+    // Clear All Items - Show confirmation modal
+    private void ConfirmClearAll()
+    {
+        showConfirmClear = true;
+    }
+
+    // Cancel the Clear All action
+    private void CancelClearAll()
+    {
+        showConfirmClear = false;
+    }
+
+    // Clear all upcoming menu items
+    private async Task ClearAllItems()
+    {
+        using var db = DbFactory.CreateDbContext();
+        db.UpcomingMenu.RemoveRange(upcomingMenu);
+        await db.SaveChangesAsync();
+        upcomingMenu.Clear();
+        showConfirmClear = false;
     }
 }

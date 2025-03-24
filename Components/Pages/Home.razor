@@ -2,61 +2,74 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using MenuAppBlazor.Models
-@inject MenuAppBlazor.Data.MenuContext Db
+@inject MenuAppBlazor.Data.MenuContext Db // Inject DbContext
 
 <PageTitle>Home</PageTitle>
 
-<h1>Dish Dashboard</h1>
+<h1>What's for Dinner Dashboard</h1>
 
-@if (dishes == null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!dishes.Any())
-{
-    <p>No dishes found.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Dish Name</th>
-                <th>Ingredients</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var dish in dishes)
-            {
-                <tr>
-                    <td>@dish.Name</td>
+<!-- Add Pick Tonight's Dinner button -->
+<button class="btn btn-outline-success mb-3 mt-3" @onclick="PickTonightDinner">
+    Pick Tonight's Dinner
+</button>
 
-                    <td>
-                        <ul>
-                            @foreach (var di in dish.DishIngredients ?? Enumerable.Empty<DishIngredient>())
-                            {
-                                <li>@di.Ingredient.Name (@di.Quantity @di.QuantityType)</li>
-                            }
-                        </ul>
-                    </td>
-                    <td>
-                        <a class="btn btn-sm btn-outline-primary" href="/edit-dish/@dish.Id">Edit</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<!-- Add space for displaying the picked dish -->
+@if (selectedDish != null)
+{
+    <div class="alert alert-light border p-3">
+        <strong>How about this dish for tonight?</strong>
+        <h5>@selectedDish.Name</h5>
+        <div class="mt-2">
+            <button class="btn btn-success" @onclick="EatIt">Eat it</button>
+            <button class="btn btn-danger" @onclick="NotToday">Not today</button>
+        </div>
+    </div>
 }
 
 @code {
-    private List<Dish>? dishes;
+    private Dish? selectedDish; // This will hold the randomly selected dish
 
-    protected override async Task OnInitializedAsync()
+    // This method triggers the random selection of a dish
+    private async Task PickTonightDinner()
     {
-        dishes = await Db.Dishes
-            .Include(d => d.DishIngredients)
-                .ThenInclude(di => di.Ingredient)
-            .ToListAsync();
+        var upcomingMenu = await Db.UpcomingMenu.Include(u => u.Dish).ToListAsync();
+
+        // If there are dishes available, pick a random one
+        if (upcomingMenu.Any())
+        {
+            var rng = new Random();
+            selectedDish = upcomingMenu[rng.Next(upcomingMenu.Count)].Dish;
+        }
+        else
+        {
+            selectedDish = null; // No dishes available
+        }
+    }
+
+    // Eat the selected dish and remove it from the menu
+    private async Task EatIt()
+    {
+        if (selectedDish != null)
+        {
+            var itemToRemove = await Db.UpcomingMenu.FirstOrDefaultAsync(u => u.DishId == selectedDish.Id);
+            if (itemToRemove != null)
+            {
+                Db.UpcomingMenu.Remove(itemToRemove);
+                await Db.SaveChangesAsync();
+            }
+
+            // Reset selected dish after eating
+            selectedDish = null;
+        }
+    }
+
+    // Reset the selection without making any changes
+    private async Task NotToday()
+    {
+        // Reset the selected dish to null and allow for a new selection
+        selectedDish = null;
+
+        // Ensure we can select a new dish after clicking "Not today"
+        await PickTonightDinner();
     }
 }
