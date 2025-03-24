@@ -11,6 +11,21 @@ Whatsfordinner is a web application that helps users manage their meal plans, in
 - **Upcoming Menu**: Display and manage upcoming menu items, with the ability to add a random meal from the list.
 - **Grocery List**: Generate a grocery list based on the selected dishes and ingredients.
 
+
+## To-Do List
+
+- **User Authentication with Role-Based Access Control (RBAC)**: Implement user authentication with roles to control access to different parts of the app.
+- **Custom Items for Grocery List**: Allow users to add custom items to the grocery list.
+- **User Profile Page for Preferences**: Add a profile page where users can store preferences (e.g., theme).
+- **Add Icons to Menu Items**: Add icons to menu items (e.g., dishes, ingredients) for better navigation.
+- **Explore Layout Options**: Experiment with layout styles for improved UI/UX and responsiveness.
+- **Add Delicious and Difficulty Ratings**: Implement ratings for meal items (deliciousness and difficulty).
+- **Admin Screen for Meal Recommendation Logic**: Create an admin screen with sliders to adjust meal recommendations.
+- **Protect Against XSS (Cross-Site Scripting)**: Implement measures to prevent Cross-Site Scripting vulnerabilities.
+- **On the Grocery List page, combine quantity and unit**: Instead of "Chicken, 2, Lbs," display it as "Chicken, 2 Lbs."
+- **On the Upcoming Menu page, replace the dropdown list to select a meal with a grid of buttons**: Display a grid of buttons (no more than 5 or 6 wide), one for each menu item, with meal photos on the button and remove the dropdown menu
+
+
 ## Setup
 
 ### Prerequisites
