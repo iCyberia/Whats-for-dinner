@@ -1,0 +1,68 @@
+﻿@page "/grocery-list"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using MenuAppBlazor.Models
+@inject MenuAppBlazor.Data.MenuContext Db
+
+<h3 class="mb-4">Grocery List</h3>
+
+@if (!groupedIngredients.Any())
+{
+    <p class="text-muted">No dishes selected in the Upcoming Menu.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in groupedIngredients)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.TotalQuantity</td>
+                    <td>@item.Unit</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<IngredientSummary> groupedIngredients = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var upcomingDishIds = await Db.UpcomingMenu
+            .Select(u => u.DishId)
+            .ToListAsync();
+
+        var ingredients = await Db.DishIngredients
+            .Where(di => upcomingDishIds.Contains(di.DishId))
+            .Include(di => di.Ingredient)
+            .ToListAsync();
+
+        groupedIngredients = ingredients
+            .GroupBy(di => new { di.Ingredient.Name, di.QuantityType })
+            .Select(g => new IngredientSummary
+                {
+                    Name = g.Key.Name,
+                    Unit = g.Key.QuantityType,
+                    TotalQuantity = g.Sum(x => x.Quantity)
+                })
+            .OrderBy(i => i.Name)
+            .ToList();
+    }
+
+    public class IngredientSummary
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+        public double TotalQuantity { get; set; }
+    }
+}

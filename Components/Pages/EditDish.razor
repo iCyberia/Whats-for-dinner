@@ -1,0 +1,172 @@
+﻿@page "/edit-dish/{id:int}"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using MenuAppBlazor.Models
+@inject MenuAppBlazor.Data.MenuContext Db
+@inject NavigationManager Navigation
+
+
+<h3>Edit Dish</h3>
+
+@if (dish == null)
+{
+    <p><em>Loading dish...</em></p>
+}
+else
+{
+    <EditForm Model="@dish" OnValidSubmit="SaveDish" FormName="EditDishForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="dish.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label>Image URL</label>
+            <InputText class="form-control" @bind-Value="dish.ImageUrl" />
+        </div>
+
+        <h5>Ingredients</h5>
+        @foreach (var item in editableIngredients)
+        {
+            <div class="row mb-2">
+                <div class="col">
+                    <InputText class="form-control" @bind-Value="item.Name" placeholder="Name" />
+                </div>
+                <div class="col">
+                    <InputNumber class="form-control" @bind-Value="item.Quantity" placeholder="Quantity" />
+                </div>
+                <div class="col">
+                    <InputText class="form-control" @bind-Value="item.QuantityType" placeholder="Type (e.g. cups)" />
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger" @onclick="@(() => RemoveIngredient(item))">❌</button>
+                </div>
+            </div>
+        }
+
+        <button type="button" class="btn btn-secondary mt-2" @onclick="AddIngredient">+ Add Ingredient</button>
+        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+        <button type="button" class="btn btn-danger mt-2" @onclick="ConfirmDelete">Delete Dish</button>
+
+    </EditForm>
+    @if (showDeleteConfirm)
+    {
+        <div class="alert alert-warning mt-3">
+            <strong>Are you sure?</strong> This will permanently delete the dish.
+            <br />
+            <button class="btn btn-danger me-2" @onclick="DeleteDish">Yes, delete it</button>
+            <button class="btn btn-secondary" @onclick="@(() => showDeleteConfirm = false)">Cancel</button>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert alert-info mt-3">@message</div>
+    }
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private Dish? dish;
+    private List<EditableIngredient> editableIngredients = new();
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dish = await Db.Dishes
+            .Include(d => d.DishIngredients)
+                .ThenInclude(di => di.Ingredient)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (dish != null)
+        {
+            editableIngredients = dish.DishIngredients
+                .Select(di => new EditableIngredient
+                    {
+                        Id = di.IngredientId,
+                        Name = di.Ingredient.Name,
+                        Quantity = di.Quantity,
+                        QuantityType = di.QuantityType
+                    }).ToList();
+        }
+    }
+
+    private void AddIngredient()
+    {
+        editableIngredients.Add(new EditableIngredient());
+    }
+
+    private void RemoveIngredient(EditableIngredient ing)
+    {
+        editableIngredients.Remove(ing);
+    }
+
+    private async Task SaveDish()
+    {
+        if (dish == null) return;
+
+        // Remove old DishIngredients
+        var existing = Db.DishIngredients.Where(di => di.DishId == dish.Id);
+        Db.DishIngredients.RemoveRange(existing);
+
+        foreach (var ing in editableIngredients)
+        {
+            var ingredient = await Db.Ingredients
+                .FirstOrDefaultAsync(i => i.Name == ing.Name);
+
+            if (ingredient == null)
+            {
+                ingredient = new Ingredient { Name = ing.Name };
+                Db.Ingredients.Add(ingredient);
+                await Db.SaveChangesAsync(); // Save to get ID
+            }
+
+            Db.DishIngredients.Add(new DishIngredient
+                {
+                    DishId = dish.Id,
+                    IngredientId = ingredient.Id,
+                    Quantity = ing.Quantity,
+                    QuantityType = ing.QuantityType
+                });
+        }
+
+        Db.Dishes.Update(dish);
+        await Db.SaveChangesAsync();
+        message = "Dish updated!";
+    }
+
+    public class EditableIngredient
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public double Quantity { get; set; }
+        public string QuantityType { get; set; } = "";
+    }
+    private bool showDeleteConfirm = false;
+
+    private void ConfirmDelete()
+    {
+        showDeleteConfirm = true;
+    }
+
+    private async Task DeleteDish()
+    {
+        if (dish == null)
+            return;
+
+        // Delete related DishIngredients first (FK constraint)
+        var related = Db.DishIngredients.Where(di => di.DishId == dish.Id);
+        Db.DishIngredients.RemoveRange(related);
+
+        // Delete the dish itself
+        Db.Dishes.Remove(dish);
+        await Db.SaveChangesAsync();
+
+        // Redirect back to homepage
+        Navigation.NavigateTo("/");
+    }
+}

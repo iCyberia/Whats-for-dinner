@@ -1,0 +1,9 @@
+# Ignore sensitive configuration files
+appsettings.json
+config.json
+.env
+
+# Ignore build files
+bin/
+obj/
+*.log

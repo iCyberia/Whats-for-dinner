@@ -1,0 +1,145 @@
+﻿@page "/upcoming-menu"
+@rendermode InteractiveServer
+@using MenuAppBlazor.Data
+@using MenuAppBlazor.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<MenuContext> DbFactory
+
+<h3 class="mb-4">Upcoming Menu</h3>
+
+<!-- Add a Dish Manually -->
+<EditForm Model="@selected" OnValidSubmit="AddToUpcoming" FormName="AddUpcomingForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="dish-select">Select Dish</label>
+        <InputSelect id="dish-select" class="form-select" @bind-Value="selected.DishId">
+            <option value="0">-- choose a dish --</option>
+            @foreach (var dish in allDishes)
+            {
+                <option value="@dish.Id">@dish.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add to Upcoming Menu</button>
+</EditForm>
+
+<!-- Random Meal Picker -->
+<button class="btn btn-outline-success mb-3 mt-3" @onclick="StartRandomMealSelection">
+    🎲 Add a Random Meal
+</button>
+
+@if (randomDish != null)
+{
+    <div class="alert alert-light border d-flex flex-column align-items-start p-3">
+        <strong>How about:</strong>
+        <h5>@randomDish.Name</h5>
+
+        <div class="mt-2">
+            <button class="btn btn-success me-2" @onclick="AddRandomMeal">Add</button>
+            <button class="btn btn-warning me-2" @onclick="ShowNextRandomMeal">Don't Add</button>
+            <button class="btn btn-secondary" @onclick="CancelRandomSelection">Cancel</button>
+        </div>
+    </div>
+}
+
+<hr class="my-4" />
+
+<!-- Current Upcoming Menu -->
+<h5>Current Upcoming Menu</h5>
+<p class="text-muted">Total meals: @upcomingMenu.Count</p>
+
+@if (upcomingMenu.Any())
+{
+    <ul class="list-group">
+        @foreach (var item in upcomingMenu)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@item.Dish.Name</span>
+                <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveFromUpcoming(item.Id))">Remove</button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">No meals in the upcoming menu.</p>
+}
+
+@code {
+    private List<Dish> allDishes = new();
+    private List<UpcomingMenuItem> upcomingMenu = new();
+    private UpcomingMenuItem selected = new UpcomingMenuItem();
+    private Dish? randomDish;
+    private Random rng = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        allDishes = await db.Dishes.OrderBy(d => d.Name).ToListAsync();
+        upcomingMenu = await db.UpcomingMenu.Include(u => u.Dish).ToListAsync();
+    }
+
+    private async Task AddToUpcoming()
+    {
+        if (selected.DishId > 0)
+        {
+            using var db = DbFactory.CreateDbContext();
+            db.UpcomingMenu.Add(new UpcomingMenuItem { DishId = selected.DishId });
+            await db.SaveChangesAsync();
+            upcomingMenu = await db.UpcomingMenu.Include(u => u.Dish).ToListAsync();
+            selected = new UpcomingMenuItem(); // Reset selection
+        }
+    }
+
+    private async Task RemoveFromUpcoming(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var item = await db.UpcomingMenu.FindAsync(id);
+        if (item != null)
+        {
+            db.UpcomingMenu.Remove(item);
+            await db.SaveChangesAsync();
+            upcomingMenu = await db.UpcomingMenu.Include(u => u.Dish).ToListAsync();
+        }
+    }
+
+    private async Task StartRandomMealSelection()
+    {
+        await ShowNextRandomMeal();
+    }
+
+    private async Task ShowNextRandomMeal()
+    {
+        using var db = DbFactory.CreateDbContext();
+        var all = await db.Dishes.ToListAsync();
+
+        if (all.Count == 0)
+        {
+            randomDish = null;
+            return;
+        }
+
+        randomDish = all[rng.Next(all.Count)];
+    }
+
+    private async Task AddRandomMeal()
+    {
+        if (randomDish != null)
+        {
+            using var db = DbFactory.CreateDbContext();
+            db.UpcomingMenu.Add(new UpcomingMenuItem { DishId = randomDish.Id });
+            await db.SaveChangesAsync();
+            upcomingMenu = await db.UpcomingMenu.Include(u => u.Dish).ToListAsync();
+        }
+
+        await ShowNextRandomMeal(); // Keep rolling
+    }
+
+    private void CancelRandomSelection()
+    {
+        randomDish = null;
+    }
+}

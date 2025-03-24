@@ -1,0 +1,62 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using MenuAppBlazor.Models
+@inject MenuAppBlazor.Data.MenuContext Db
+
+<PageTitle>Home</PageTitle>
+
+<h1>Dish Dashboard</h1>
+
+@if (dishes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!dishes.Any())
+{
+    <p>No dishes found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Dish Name</th>
+                <th>Ingredients</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dish in dishes)
+            {
+                <tr>
+                    <td>@dish.Name</td>
+
+                    <td>
+                        <ul>
+                            @foreach (var di in dish.DishIngredients ?? Enumerable.Empty<DishIngredient>())
+                            {
+                                <li>@di.Ingredient.Name (@di.Quantity @di.QuantityType)</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="/edit-dish/@dish.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Dish>? dishes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dishes = await Db.Dishes
+            .Include(d => d.DishIngredients)
+                .ThenInclude(di => di.Ingredient)
+            .ToListAsync();
+    }
+}

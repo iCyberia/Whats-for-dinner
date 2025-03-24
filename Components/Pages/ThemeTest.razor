@@ -1,0 +1,78 @@
+﻿@page "/themetest"
+@using Microsoft.JSInterop
+
+<!--
+     This page is a minimal example that doesn't rely on your App.razor or MainLayout.razor.
+     It contains everything needed to test theme toggling in one place.
+-->
+
+<h3>Theme Test Page</h3>
+
+<!-- Link tags for the two themes -->
+<link id="theme-light" href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<link id="theme-dark" href="css/bootstrap.darkly.css" rel="stylesheet" disabled />
+
+<!-- Inline script to handle theme toggling -->
+<script>
+    window.toggleTheme = function() {
+        console.log("toggleTheme() called");
+        const light = document.getElementById('theme-light');
+        const dark = document.getElementById('theme-dark');
+        if (!light || !dark) {
+            console.error("Theme link elements not found!");
+            return;
+        }
+
+        const isDark = !dark.disabled;
+        if (isDark) {
+            console.log("Switching to LIGHT theme");
+            dark.disabled = true;
+            light.disabled = false;
+            localStorage.setItem('theme', 'light');
+        } else {
+            console.log("Switching to DARK theme");
+            dark.disabled = false;
+            light.disabled = true;
+            localStorage.setItem('theme', 'dark');
+        }
+    };
+
+    window.applySavedTheme = function() {
+        console.log("applySavedTheme() called");
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const light = document.getElementById('theme-light');
+        const dark = document.getElementById('theme-dark');
+        if (!light || !dark) {
+            console.error("Theme link elements not found!");
+            return;
+        }
+
+        if (savedTheme === 'dark') {
+            console.log("Applying DARK theme from localStorage");
+            dark.disabled = false;
+            light.disabled = true;
+        } else {
+            console.log("Applying LIGHT theme from localStorage");
+            dark.disabled = true;
+            light.disabled = false;
+        }
+    };
+
+    // Apply the saved theme on page load
+    window.applySavedTheme();
+</script>
+
+<!-- Button to toggle theme -->
+<button class="btn btn-primary" @onclick="ToggleTheme">Toggle Theme</button>
+
+@code {
+    // We inject JSRuntime so we can call JS functions via Blazor
+    [Inject]
+    IJSRuntime JS { get; set; } = default!;
+
+    private async Task ToggleTheme()
+    {
+        // Call the JS function "toggleTheme"
+        await JS.InvokeVoidAsync("toggleTheme");
+    }
+}

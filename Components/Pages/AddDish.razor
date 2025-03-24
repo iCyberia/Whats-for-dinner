@@ -1,0 +1,105 @@
+﻿@page "/add-dish"
+@rendermode InteractiveServer
+@using MenuAppBlazor.Models
+@inject MenuAppBlazor.Data.MenuContext Db
+
+<h3>Add Dish</h3>
+
+@if (debugMessage != null)
+{
+    <div class="alert alert-info">@debugMessage</div>
+}
+
+<EditForm Model="@dishModel" OnSubmit="HandleSubmit" FormName="AddDishForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Dish Name</label>
+        <InputText class="form-control" @bind-Value="dishModel.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Image URL</label>
+        <InputText class="form-control" @bind-Value="dishModel.ImageUrl" />
+    </div>
+
+    <h5>Ingredients</h5>
+    @foreach (var ing in ingredients)
+    {
+        <div class="row mb-2">
+            <div class="col">
+                <InputText class="form-control" @bind-Value="ing.Name" placeholder="Name" />
+            </div>
+            <div class="col">
+                <InputNumber class="form-control" @bind-Value="ing.Quantity" placeholder="Quantity" />
+            </div>
+            <div class="col">
+                <InputText class="form-control" @bind-Value="ing.QuantityType" placeholder="Type (e.g. cups)" />
+            </div>
+        </div>
+    }
+
+</EditForm>
+
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddIngredient">+ Add Ingredient</button>
+<button type="button" class="btn btn-primary mt-2" @onclick="HandleSubmit">Save Dish</button>
+
+@code {
+    private Dish dishModel = new Dish
+        {
+            Name = string.Empty,
+            ImageUrl = string.Empty
+        };
+
+    private List<ManualIngredient> ingredients = new();
+    private string? debugMessage;
+
+    private void AddIngredient()
+    {
+        ingredients.Add(new ManualIngredient());
+        StateHasChanged();
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            Db.Dishes.Add(dishModel);
+            await Db.SaveChangesAsync();
+
+            foreach (var ing in ingredients)
+            {
+                var dbIngredient = new Ingredient { Name = ing.Name };
+                Db.Ingredients.Add(dbIngredient);
+                await Db.SaveChangesAsync();
+
+                Db.DishIngredients.Add(new DishIngredient
+                    {
+                        DishId = dishModel.Id,
+                        IngredientId = dbIngredient.Id,
+                        Quantity = ing.Quantity,
+                        QuantityType = ing.QuantityType
+                    });
+            }
+
+            await Db.SaveChangesAsync();
+
+            debugMessage = "Dish and ingredients added!";
+            dishModel = new Dish { Name = string.Empty, ImageUrl = string.Empty };
+            ingredients.Clear();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    public class ManualIngredient
+    {
+        public string Name { get; set; } = string.Empty;
+        public double Quantity { get; set; }
+        public string QuantityType { get; set; } = string.Empty;
+    }
+}
