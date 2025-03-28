@@ -1,6 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JS
 
+<!-- Header image-->
+
+
 <div class="d-flex">
     <!-- Sidebar (NavMenu) -->
     <div class="sidebar">
@@ -8,8 +11,12 @@
     </div>
 
     <!-- Main Content Area -->
+
     <main class="content">
         <article class="content px-4">
+            <div class="header">
+                <img src="img/Banner.png" alt="Header Image" class="header-image" />
+            </div>
             @Body
         </article>
     </main>

@@ -1,49 +1,75 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JS
 
+<!-- Top Navbar with Toggle Button for Mobile -->
 <div class="top-row ps-3 navbar navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">What's for Dinner?</a>
+        <!-- Navbar Toggle Button for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
     </div>
 </div>
 
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-        <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-            <nav class="flex-column">
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/upcoming-menu">
-                        <span class="oi oi-calendar"></span> Upcoming Menu
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/grocery-list">
-                        Grocery List
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink href="/add-dish" class="nav-link">
-                        Add Dish
-                    </NavLink>
-                </div>
-            </nav>
+<!-- Collapsible Navbar (for mobile) -->
+<div class="collapse navbar-collapse" id="navbarNav">
+    <nav class="flex-column navbar-nav">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
         </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <main class="content">
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/upcoming-menu">
+                <span class="oi oi-calendar"></span> Upcoming Menu
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/grocery-list">
+                Grocery List
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink href="/add-dish" class="nav-link">
+                Add Dish
+            </NavLink>
+        </div>
+    </nav>
 </div>
+
+<!-- Sidebar (for large screens only) -->
+<div class="sidebar d-none d-lg-block">
+    <nav class="navbar-nav">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/upcoming-menu">
+                <span class="oi oi-calendar"></span> Upcoming Menu
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/grocery-list">
+                Grocery List
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink href="/add-dish" class="nav-link">
+                Add Dish
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<!-- Main Content Area -->
+<main class="content">
+    <article class="content px-4">
+        @Body
+    </article>
+</main>
 
 <div id="blazor-error-ui">
     <p>An unhandled error has occurred.</p>
@@ -54,7 +80,6 @@
 @code {
     private async Task ToggleTheme()
     {
-        // Calls the JavaScript function to toggle the theme
         await JS.InvokeVoidAsync("toggleTheme");
     }
 }
