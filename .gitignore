@@ -5,31 +5,40 @@ obj/
 # ASP.NET Core files
 wwwroot/lib/
 
-# User-specific files
+# NuGet packages
+*.nupkg
+.nuget/
+
+# User-specific files and caches
 .vscode/
 .idea/
 .vs/
-
+*.suo
+*.user
+*.rsuser
+*.userosscache
 
 # Log files
 logs/
+*.log
 
 # System files
 .DS_Store
 Thumbs.db
-MenuAppBlazor.csproj
 
-# Sensitive information
+# Sensitive information (ensure these are kept out of source control)
 appsettings.json
 appsettings.Development.json
 MenuAppBlazor.csproj.user
 
-# Ignore node_modules (if using npm or yarn for front-end dependencies)
+# Node modules (if using npm or yarn for front-end dependencies)
 node_modules/
+
+# Additional folders (if applicable)
 Properties/
 
-# Ignore Visual Studio for Mac configuration folder
-.vscode/
-
 # Ignore backup files created by the editor
-*~ 
+*~
+
+# Publish output (if publishing your app)
+publish/
