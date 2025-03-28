@@ -8,10 +8,10 @@ Whatsfordinner is a web application that helps users manage their meal plans, in
 
 - **Add Dishes and Ingredients**: Create dishes with a list of ingredients, including a quantity and unit.
 ![Screenshot](https://github.com/iCyberia/Whats-for-dinner/raw/main/img/addadish.png)
-- 
+
 - **Upcoming Menu**: Display and manage upcoming menu items, with the ability to add a random meal from the list.
 ![Screenshot](https://github.com/iCyberia/Whats-for-dinner/raw/main/img/upcommingmenu.png)
-- 
+ 
 - **Grocery List**: Generate a grocery list based on the selected dishes and ingredients.
 ![Screenshot](https://github.com/iCyberia/Whats-for-dinner/raw/main/img/grocerylist.png)
 
