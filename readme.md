@@ -30,7 +30,7 @@ Whatsfordinner is a web application that helps users manage their meal plans, in
 Clone the repository:
    ```bash
    git clone https://github.com/iCyberia/Whats-for-dinner
-   cd MenuAppBlazor
+   cd Whats-for-dinner
    ```
 
 
